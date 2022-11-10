@@ -51,6 +51,7 @@ jobs:
       - name: compress
         run: |
           ls | grep "aoaostar_mooc_" | awk '{ print "cp sample.config.json "$0"/config.json" | "/bin/bash" }'
+          ls | grep "aoaostar_mooc_" | awk '{ print "cp -r view "$0"/view" | "/bin/bash" }'
           ls | grep "linux" | awk '{ print "tar -zcvf "$0".tar.gz "$0 | "/bin/bash" }'
           zip -r aoaostar_mooc_windows_amd64.zip aoaostar_mooc_windows_amd64
 
