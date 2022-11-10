@@ -130,9 +130,9 @@ func (i YingHua) StudyChapter(chapter types.ChaptersList) {
 func (i YingHua) StudyNode(node types.ChaptersNodeList) {
 
 	i.Output(fmt.Sprintf("当前第 %d 课, [%s][nodeId=%d]", node.Idx, node.Name, node.ID))
-	studyTime := 1
-	studyId := 0
-	nodeProgress := types.NodeVideoData{
+	var studyTime = 1
+	var studyId = 0
+	var nodeProgress = types.NodeVideoData{
 		StudyTotal: types.NodeVideoStudyTotal{
 			Progress: "0.00",
 		},
@@ -140,38 +140,41 @@ func (i YingHua) StudyNode(node types.ChaptersNodeList) {
 	var flag = true
 	go func() {
 		for flag {
-			nodeProgress, err := i.GetNodeProgress(node)
+			var err error
+			nodeProgress, err = i.GetNodeProgress(node)
 			if err != nil {
 				i.OutputWith(fmt.Sprintf("%s[nodeId=%d], %s[studyId=%d]", node.Name, node.ID, err.Error(), studyId), logrus.Errorf)
+				flag = false
 				break
 			}
 			if nodeProgress.StudyTotal.State == "2" {
 				node.VideoState = 2
+				flag = false
 				break
 			}
 			time.Sleep(time.Second * 10)
 		}
 	}()
 
-	for node.VideoState != 2 {
-	captcha:
-		var resp = new(types.StudyNodeResponse)
-		formData := map[string]string{
+	for node.VideoState != 2 && flag {
+		var formData = map[string]string{
 			"nodeId":    strconv.Itoa(node.ID),
 			"token":     i.User.Token,
 			"studyTime": strconv.Itoa(studyTime),
 			"studyId":   strconv.Itoa(studyId),
 		}
+	captcha:
+		var resp = new(types.StudyNodeResponse)
 		_, err := i.client.R().
 			SetFormData(formData).
 			SetResult(resp).
 			Post("/api/node/study.json")
 		if err != nil {
-			i.OutputWith(fmt.Sprintf("%s[nodeId=%d], %s[studyId=%d]", node.Name, node.ID, err.Error(), studyId), logrus.Errorf)
+			i.OutputWith(fmt.Sprintf("%s[nodeId=%d], %s[studyId=%d][studyTime=%d]", node.Name, node.ID, err.Error(), studyId, studyTime), logrus.Errorf)
 			continue
 		}
 		if resp.Code != 0 {
-			i.OutputWith(fmt.Sprintf("%s[nodeId=%d], %s[studyId=%d]", node.Name, node.ID, resp.Msg, studyId), logrus.Errorf)
+			i.OutputWith(fmt.Sprintf("%s[nodeId=%d], %s[studyId=%d][studyTime=%d]", node.Name, node.ID, resp.Msg, studyId, studyTime), logrus.Errorf)
 			if resp.NeedCode {
 				formData["code"] = i.FuckCaptcha() + "_"
 				goto captcha
@@ -181,7 +184,7 @@ func (i YingHua) StudyNode(node types.ChaptersNodeList) {
 		}
 		studyId = resp.Result.Data.StudyID
 		if nodeProgress.StudyTotal.Progress == "" {
-			nodeProgress.StudyTotal.Progress = "0"
+			nodeProgress.StudyTotal.Progress = "0.00"
 
 		}
 		parseFloat, err := strconv.ParseFloat(nodeProgress.StudyTotal.Progress, 64)

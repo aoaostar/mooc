@@ -2,3 +2,5 @@
 config.json
 *.exe
 logs
+*.ps1
+aoaostar_mooc
