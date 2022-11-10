@@ -137,9 +137,14 @@ func (i YingHua) StudyNode(node types.ChaptersNodeList) {
 			Progress: "0.00",
 		},
 	}
+	var flag = true
 	go func() {
-		for true {
-			nodeProgress = i.GetNodeProgress(node)
+		for flag {
+			nodeProgress, err := i.GetNodeProgress(node)
+			if err != nil {
+				i.OutputWith(fmt.Sprintf("%s[nodeId=%d], %s[studyId=%d]", node.Name, node.ID, err.Error(), studyId), logrus.Errorf)
+				break
+			}
 			if nodeProgress.StudyTotal.State == "2" {
 				node.VideoState = 2
 				break
@@ -162,15 +167,16 @@ func (i YingHua) StudyNode(node types.ChaptersNodeList) {
 			SetResult(resp).
 			Post("/api/node/study.json")
 		if err != nil {
-			i.OutputWith(err.Error(), logrus.Errorf)
+			i.OutputWith(fmt.Sprintf("%s[nodeId=%d], %s[studyId=%d]", node.Name, node.ID, err.Error(), studyId), logrus.Errorf)
 			continue
 		}
 		if resp.Code != 0 {
-			i.OutputWith(resp.Msg, logrus.Errorf)
+			i.OutputWith(fmt.Sprintf("%s[nodeId=%d], %s[studyId=%d]", node.Name, node.ID, resp.Msg, studyId), logrus.Errorf)
 			if resp.NeedCode {
 				formData["code"] = i.FuckCaptcha() + "_"
 				goto captcha
 			}
+			flag = false
 			break
 		}
 		studyId = resp.Result.Data.StudyID
@@ -181,7 +187,7 @@ func (i YingHua) StudyNode(node types.ChaptersNodeList) {
 		parseFloat, err := strconv.ParseFloat(nodeProgress.StudyTotal.Progress, 64)
 
 		if err != nil {
-			i.OutputWith(err.Error(), logrus.Errorf)
+			i.OutputWith(fmt.Sprintf("%s[nodeId=%d], %s[studyId=%d]", node.Name, node.ID, err.Error(), studyId), logrus.Errorf)
 			continue
 		}
 		i.Output(fmt.Sprintf("%s[nodeId=%d], %s[studyId=%d], 当前进度: %.f%%", node.Name, node.ID, resp.Msg, studyId, parseFloat*100))
@@ -190,7 +196,7 @@ func (i YingHua) StudyNode(node types.ChaptersNodeList) {
 	}
 }
 
-func (i YingHua) GetNodeProgress(node types.ChaptersNodeList) types.NodeVideoData {
+func (i YingHua) GetNodeProgress(node types.ChaptersNodeList) (types.NodeVideoData, error) {
 
 	var resp = new(types.NodeVideoResponse)
 	_, err := i.client.R().
@@ -201,12 +207,13 @@ func (i YingHua) GetNodeProgress(node types.ChaptersNodeList) types.NodeVideoDat
 		SetResult(resp).
 		Post("/api/node/video.json")
 	if err != nil {
-		i.OutputWith(err.Error(), logrus.Errorf)
+		i.OutputWith(fmt.Sprintf("%s[nodeId=%d], %s", node.Name, node.ID, err.Error()), logrus.Errorf)
+		return resp.Result.Data, nil
 	}
 	if resp.Code != 0 {
-		i.OutputWith(resp.Msg, logrus.Errorf)
+		return resp.Result.Data, errors.New(resp.Msg)
 	}
-	return resp.Result.Data
+	return resp.Result.Data, nil
 }
 
 func (i YingHua) FuckCaptcha() string {

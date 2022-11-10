@@ -3,6 +3,7 @@ package task
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"math"
 	"sync"
 	"yinghua/pkg/config"
 	"yinghua/pkg/yinghua"
@@ -18,9 +19,10 @@ type Task struct {
 var Tasks []Task
 
 func Start() {
-	jobs := make(chan Task, config.Conf.Global.Limit)
+	limit := int(math.Min(float64(config.Conf.Global.Limit), float64(len(Tasks))))
+	jobs := make(chan Task, limit)
 	wg := sync.WaitGroup{}
-	for i := 0; i < config.Conf.Global.Limit; i++ {
+	for i := 0; i < limit; i++ {
 		go func() {
 			defer wg.Done()
 			for job := range jobs {
@@ -40,7 +42,6 @@ func Start() {
 }
 
 func work(task Task) {
-
 	instance := yinghua.New(task.User)
 	err := instance.Login()
 	if err != nil {
