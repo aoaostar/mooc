@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>傲星网课助手</title>
+    <link rel="shortcut icon" href="https://www.aoaostar.com/favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        #panel {
+            height: 100%;
+            width: 100%;
+            overflow-y: auto;
+            background-color: #333;
+            color: #fff;
+            padding: 1rem;
+            word-break: break-all;
+            white-space: pre-wrap;
+            box-sizing: border-box;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+<div id="panel">
+
+</div>
+<script>
+    const func = () => fetch('/ajax').then(async resp => {
+        const element = document.getElementById('panel');
+        element.innerText = await resp.text()
+        element.scrollTop = element.scrollHeight
+
+    }).finally(() => {
+        setTimeout(func, 1000)
+    })
+    func()
+</script>
+</body>
+</html>

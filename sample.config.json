@@ -1,0 +1,14 @@
+{
+  "global": {
+    "server": ":10086",
+    "limit": 3
+  },
+  "users": [
+    {
+      "base_url": "https://mooc.yinghuaonline.com/",
+      "school_id": 0,
+      "username": "username",
+      "password": "password"
+    }
+  ]
+}
