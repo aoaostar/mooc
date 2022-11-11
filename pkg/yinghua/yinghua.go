@@ -128,7 +128,7 @@ func (i YingHua) StudyChapter(chapter types.ChaptersList) {
 }
 
 func (i YingHua) StudyNode(node types.ChaptersNodeList) {
-
+startStudy:
 	i.Output(fmt.Sprintf("当前第 %d 课, [%s][nodeId=%d]", node.Idx, node.Name, node.ID))
 	var studyTime = 1
 	var studyId = 0
@@ -149,14 +149,17 @@ func (i YingHua) StudyNode(node types.ChaptersNodeList) {
 			}
 			if nodeProgress.StudyTotal.State == "2" {
 				node.VideoState = 2
-				flag = false
 				break
 			}
 			time.Sleep(time.Second * 10)
 		}
 	}()
 
-	for node.VideoState != 2 && flag {
+	for node.VideoState != 2 {
+		if !flag {
+			goto startStudy
+		}
+
 		var formData = map[string]string{
 			"nodeId":    strconv.Itoa(node.ID),
 			"token":     i.User.Token,

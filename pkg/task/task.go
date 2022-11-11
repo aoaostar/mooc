@@ -54,6 +54,10 @@ func work(task Task) {
 		instance.Output(fmt.Sprintf("当前课程[%s][%d] 进度: %s, 跳过", task.Course.Name, task.Course.ID, task.Course.Progress1))
 		return
 	}
+	if task.Course.State == 2 {
+		instance.Output(fmt.Sprintf("当前课程[%s][%d] 已结束, 跳过", task.Course.Name, task.Course.ID))
+		return
+	}
 	instance.Output(fmt.Sprintf("当前课程[%s][%d] 进度: %s", task.Course.Name, task.Course.ID, task.Course.Progress1))
 	err = instance.StudyCourse(task.Course)
 	if err != nil {
