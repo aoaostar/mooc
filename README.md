@@ -25,7 +25,7 @@
 > 使用`mooc.yinghuaonline.com`时`school_id`为必填项  
 > 使用自己学校的平台可以不填，默认为`0`  
 > `server`网页端地址, `:10086`=> `127.0.0.1:10086`  
-> `limit`协程数, 支持多门课程一起刷  
+> `limit`协程数, 支持多门课程一起刷, 拉满可以以最快速度刷完  
 > JSON编辑工具: <https://tool.aoaostar.com/json>
 ```json
 {
