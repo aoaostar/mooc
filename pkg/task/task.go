@@ -37,6 +37,7 @@ func Start() {
 	for _, task := range Tasks {
 		jobs <- task
 	}
+	close(jobs)
 	wg.Wait()
 	logrus.Infof("恭喜您, 所有任务都已全部完成~~~")
 }
