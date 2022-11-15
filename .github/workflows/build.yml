@@ -53,6 +53,7 @@ jobs:
         run: |
           ls | grep "aoaostar_mooc_" | awk '{ print "cp sample.config.json "$0"/config.json" | "/bin/bash" }'
           ls | grep "aoaostar_mooc_" | awk '{ print "cp -r view "$0"/view" | "/bin/bash" }'
+          ls | grep "windows" | awk '{ print "cp -r scripts/*.bat "$0"" | "/bin/bash" }'
 
       - name: Upload artifacts linux_amd64
         uses: actions/upload-artifact@v2
