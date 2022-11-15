@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	browser "github.com/EDDYCJY/fake-useragent"
+	"github.com/aoaostar/mooc/pkg/config"
+	"github.com/aoaostar/mooc/pkg/util"
+	"github.com/aoaostar/mooc/pkg/yinghua/types"
 	"github.com/go-resty/resty/v2"
 	"github.com/sirupsen/logrus"
 	"strconv"
 	"time"
-	"yinghua/pkg/config"
-	"yinghua/pkg/util"
-	"yinghua/pkg/yinghua/types"
 )
 
 type YingHua struct {
@@ -24,6 +25,7 @@ func New(user config.User) *YingHua {
 	var client = resty.New()
 	client.SetBaseURL(user.BaseURL)
 	client.SetRetryCount(3)
+	client.SetHeader("user-agent", browser.Mobile())
 	return &YingHua{
 		User:   user,
 		client: client,
@@ -55,7 +57,10 @@ func (i *YingHua) Login() error {
 
 	i.client.SetCookies(resp2.Cookies())
 
-	i.User.Token = resp.Result.Data.Token
+	i.client.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		c.FormData.Set("token", resp.Result.Data.Token)
+		return nil
+	})
 
 	return nil
 
@@ -66,9 +71,6 @@ func (i *YingHua) GetCourses() error {
 	resp := new(types.CoursesResponse)
 	_, err := i.client.R().
 		SetResult(resp).
-		SetFormData(map[string]string{
-			"token": i.User.Token,
-		}).
 		Post("/api/course.json")
 
 	if err != nil {
@@ -88,7 +90,6 @@ func (i *YingHua) GetChapters(course types.CoursesList) ([]types.ChaptersList, e
 	_, err := i.client.R().
 		SetResult(resp).
 		SetFormData(map[string]string{
-			"token":    i.User.Token,
 			"courseId": strconv.Itoa(course.ID),
 		}).
 		Post("/api/course/chapter.json")
@@ -162,7 +163,6 @@ startStudy:
 
 		var formData = map[string]string{
 			"nodeId":    strconv.Itoa(node.ID),
-			"token":     i.User.Token,
 			"studyTime": strconv.Itoa(studyTime),
 			"studyId":   strconv.Itoa(studyId),
 		}
@@ -208,7 +208,6 @@ func (i YingHua) GetNodeProgress(node types.ChaptersNodeList) (types.NodeVideoDa
 	_, err := i.client.R().
 		SetFormData(map[string]string{
 			"nodeId": strconv.Itoa(node.ID),
-			"token":  i.User.Token,
 		}).
 		SetResult(resp).
 		Post("/api/node/video.json")
