@@ -1,13 +1,13 @@
 package bootstrap
 
 import (
+	"github.com/aoaostar/mooc/pkg/config"
+	"github.com/aoaostar/mooc/pkg/util"
 	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"os"
 	"strings"
-	"yinghua/pkg/config"
-	"yinghua/pkg/util"
 )
 
 func InitWeb() {

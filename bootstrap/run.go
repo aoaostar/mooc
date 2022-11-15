@@ -2,11 +2,11 @@ package bootstrap
 
 import (
 	"fmt"
+	"github.com/aoaostar/mooc/pkg/config"
+	"github.com/aoaostar/mooc/pkg/task"
+	"github.com/aoaostar/mooc/pkg/util"
+	"github.com/aoaostar/mooc/pkg/yinghua"
 	"github.com/sirupsen/logrus"
-	"yinghua/pkg/config"
-	"yinghua/pkg/task"
-	"yinghua/pkg/util"
-	"yinghua/pkg/yinghua"
 )
 
 func Run() {

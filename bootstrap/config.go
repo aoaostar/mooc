@@ -3,9 +3,9 @@ package bootstrap
 import (
 	"encoding/json"
 	"errors"
+	"github.com/aoaostar/mooc/pkg/config"
 	"io"
 	"os"
-	"yinghua/pkg/config"
 )
 
 func InitConfig() error {

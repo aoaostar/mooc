@@ -13,9 +13,8 @@ type User struct {
 	SchoolID int    `json:"school_id"`
 	Username string `json:"username"`
 	Password string `json:"password"`
-	Token    string `json:"token"`
 }
 
 var Conf Config
 
-const VERSION = "v1.0"
+const VERSION = "v1.3"

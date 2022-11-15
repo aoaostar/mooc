@@ -2,12 +2,12 @@ package task
 
 import (
 	"fmt"
+	"github.com/aoaostar/mooc/pkg/config"
+	"github.com/aoaostar/mooc/pkg/yinghua"
+	"github.com/aoaostar/mooc/pkg/yinghua/types"
 	"github.com/sirupsen/logrus"
 	"math"
 	"sync"
-	"yinghua/pkg/config"
-	"yinghua/pkg/yinghua"
-	"yinghua/pkg/yinghua/types"
 )
 
 type Task struct {
@@ -32,7 +32,7 @@ func Start() {
 		wg.Add(1)
 	}
 
-	logrus.Infof("任务系统启动成功, 协程数: %d, 任务数: %d", config.Conf.Global.Limit, len(Tasks))
+	logrus.Infof("任务系统启动成功, 协程数: %d, 任务数: %d", limit, len(Tasks))
 
 	for _, task := range Tasks {
 		jobs <- task

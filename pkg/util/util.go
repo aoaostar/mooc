@@ -3,12 +3,12 @@ package util
 import (
 	"bufio"
 	"bytes"
+	"github.com/aoaostar/mooc/pkg/config"
 	"github.com/sirupsen/logrus"
 	"os"
 	"runtime"
 	"strconv"
 	"strings"
-	"yinghua/pkg/config"
 )
 
 func SaveJson(filename, data string) {
@@ -82,7 +82,8 @@ func Copyright() {
    /:/  /   \::/  /    /:/  /   \::/  /   \::/  /   \/__/      /:/  /   |:\/__/ 
    \/__/     \/__/     \/__/     \/__/     \/__/               \/__/     \|__|
 
-               Version: %s Runtime: %s/%s Go Version: %s
+                   Github: https://github.com/aoaostar/mooc
+            Version: %s Runtime: %s/%s Go Version: %s Author: Pluto
 +---------------------------------------------------------------------------------------+
 `, config.VERSION, runtime.GOOS, runtime.GOARCH, runtime.Version())
 }

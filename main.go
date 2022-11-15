@@ -1,7 +1,7 @@
 package main
 
 import (
-	"yinghua/bootstrap"
+	"github.com/aoaostar/mooc/bootstrap"
 )
 
 func main() {
