@@ -11,6 +11,7 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/sirupsen/logrus"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -18,6 +19,7 @@ type YingHua struct {
 	User    config.User
 	Courses []types.CoursesList
 	client  *resty.Client
+	sync.Mutex
 }
 
 func New(user config.User) *YingHua {
@@ -58,6 +60,9 @@ func (i *YingHua) Login() error {
 	i.client.SetCookies(resp2.Cookies())
 
 	i.client.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		// 这里要加锁，避免并发操作map,引发panic
+		i.Lock()
+		defer i.Unlock()
 		c.FormData.Set("token", resp.Result.Data.Token)
 		return nil
 	})
