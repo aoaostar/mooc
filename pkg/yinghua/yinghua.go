@@ -11,7 +11,6 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/sirupsen/logrus"
 	"strconv"
-	"sync"
 	"time"
 )
 
@@ -19,7 +18,6 @@ type YingHua struct {
 	User    config.User
 	Courses []types.CoursesList
 	client  *resty.Client
-	sync.Mutex
 }
 
 func New(user config.User) *YingHua {
@@ -60,10 +58,7 @@ func (i *YingHua) Login() error {
 	i.client.SetCookies(resp2.Cookies())
 
 	i.client.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		// 这里要加锁，避免并发操作map,引发panic
-		i.Lock()
-		defer i.Unlock()
-		c.FormData.Set("token", resp.Result.Data.Token)
+		req.FormData.Set("token", resp.Result.Data.Token)
 		return nil
 	})
 
@@ -121,7 +116,7 @@ func (i *YingHua) StudyCourse(course types.CoursesList) error {
 	return nil
 }
 
-func (i YingHua) StudyChapter(chapter types.ChaptersList) {
+func (i *YingHua) StudyChapter(chapter types.ChaptersList) {
 
 	i.Output(fmt.Sprintf("当前第 %d 章, [%s][chapterId=%d]", chapter.Idx, chapter.Name, chapter.ID))
 	for _, node := range chapter.NodeList {
@@ -133,7 +128,7 @@ func (i YingHua) StudyChapter(chapter types.ChaptersList) {
 
 }
 
-func (i YingHua) StudyNode(node types.ChaptersNodeList) {
+func (i *YingHua) StudyNode(node types.ChaptersNodeList) {
 startStudy:
 	i.Output(fmt.Sprintf("当前第 %d 课, [%s][nodeId=%d]", node.Idx, node.Name, node.ID))
 	var studyTime = 1
@@ -207,7 +202,7 @@ startStudy:
 	}
 }
 
-func (i YingHua) GetNodeProgress(node types.ChaptersNodeList) (types.NodeVideoData, error) {
+func (i *YingHua) GetNodeProgress(node types.ChaptersNodeList) (types.NodeVideoData, error) {
 
 	var resp = new(types.NodeVideoResponse)
 	_, err := i.client.R().
@@ -226,7 +221,7 @@ func (i YingHua) GetNodeProgress(node types.ChaptersNodeList) (types.NodeVideoDa
 	return resp.Result.Data, nil
 }
 
-func (i YingHua) FuckCaptcha() string {
+func (i *YingHua) FuckCaptcha() string {
 
 	i.Output("正在识别验证码")
 	response, err := i.client.R().
@@ -252,10 +247,10 @@ func (i YingHua) FuckCaptcha() string {
 	i.Output(fmt.Sprintf("验证码识别成功: %s", s))
 	return s
 }
-func (i YingHua) Output(message string) {
+func (i *YingHua) Output(message string) {
 	i.OutputWith(message, logrus.Infof)
 }
 
-func (i YingHua) OutputWith(message string, writer func(format string, args ...interface{})) {
+func (i *YingHua) OutputWith(message string, writer func(format string, args ...interface{})) {
 	writer("[协程ID=%d][%s] %s", util.GetGid(), i.User.Username, message)
 }
